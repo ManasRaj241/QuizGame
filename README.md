@@ -1,81 +1,82 @@
-# TinyURL Microservices
+````markdown
+# Quiz App Backend (Spring Boot Skeleton)
 
-A scalable, containerized **URL Shortener** application built with **Java (Spring Boot)**, **Redis**, and deployed using **Docker**, **Kubernetes (Minikube)**, and **Helm** — powered by **GitHub Actions CI/CD**.
-
----
-
-## ✨ Features
-
-- **Microservice Architecture**: Separate services for shortening and resolving URLs
-- **Spring Boot** with Gradle for clean, testable Java code
-- **Redis** as a lightning-fast in-memory store
-- **CI/CD** pipeline with GitHub Actions (build, test, Dockerize, push)
-- **Kubernetes Deployment** via Helm Charts
-- **Local Dev & Test** using Docker Compose or Minikube
+This is the **backend skeleton** for the Quiz App built with **Spring Boot**.  
+Currently, it contains a minimal setup with Swagger UI and a sample controller to test APIs.  
 
 ---
 
-## 📁 Project Structure
+## 🚀 Tech Stack
+- **Java 21**
+- **Spring Boot 3.5.5**
+- **Gradle**
+- **Spring Web**
+- **Spring Data JPA** (DB integration placeholder)
+- **PostgreSQL Driver**
+- **Lombok**
+- **Springdoc OpenAPI (Swagger UI)**
 
-```bash
-TinyUrl/
-├── .github/
-│   └── workflows/
-│       └── cicd.yaml          # GitHub Actions pipeline
-├── tinyurl/                   # Helm chart (templates, values)
-├── url-shortener/            # Spring Boot service to shorten URLs
-│   └── Dockerfile
-├── url-resolver/             # Spring Boot service to resolve shortened URLs
-│   └── Dockerfile
-└── README.md
+---
+
+## ⚙️ Setup Instructions
+
+### 1️ : Clone the repository
 ```
----
+git clone https://github.com/ManasRaj241/QuizGame.git
+cd quiz-app-backend
+docker-compose up -d
+docker ps
+````
 
-## ⚙️ Technologies Used
-- **Java 17 + Spring Boot**
-- **Redis**
-- **Docker & Docker Compose**
-- **Kubernetes (Minikube)**
-- **Helm**
-- **GitHub Actions (CI/CD)**
+### 2️ : Build the project
 
-## 🚀 Setup Instructions
-- **Clone the Repo**
-- **cd TinyUrl**
-- **Build and Run with Docker Compose (Local Dev) -> docker-compose up --build**
-- **Minikube + Helm (Local K8s Deployment)**
-    - **minikube start**
-    - **helm install tinyurl .**
-
-## ✅ GitHub Actions CI/CD
-- **Trigger: Every push to main branch**
-- **Actions Performed:**
-    - **Build both Spring Boot apps**
-    - **Run tests**
-    - **Build and push Docker images to Docker Hub**
-    - **Secrets required in GitHub:**
-        - **DOCKER_USERNAME**
-        - **DOCKER_PASSWORD**
-
----
-## 🧪 API Endpoints (Sample)
-```bash
-POST /api/shorten
-{
-  "longUrl": "https://example.com"
-}
 ```
-Resolve a Short URL
-```bash
-GET /{shortId}
+./gradlew clean build
 ```
----
-## 🛡 Future Enhancements
-- **Push to real Kubernetes cluster (GKE, EKS)**
-- **Ingress + HTTPS via cert-manager**
 
-## 🤝 Contributing
-- **Feel free to fork this repo, create feature branches, and submit PRs!**
-  
-## License
-- **MIT License - © 2025 Manas Ranjan Satapathy**
+### 3️: Run the application
+
+```
+./gradlew bootRun
+```
+
+### 4️ : Access Swagger UI
+
+After starting the app, open:
+👉 [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+You will see all the available APIs.
+
+---
+
+## 📌 Example Controller
+
+Currently, the project has a sample `QuizController` with in-memory data.
+
+**Endpoints:**
+
+* `GET /api/quizzes` → Get all quizzes
+* `GET /api/quizzes/{id}` → Get a quiz by ID
+* `POST /api/quizzes` → Create a new quiz
+* `DELETE /api/quizzes/{id}` → Delete a quiz
+
+---
+
+## ✅ Current Status
+
+This project is a **skeleton** with:
+
+* Swagger UI working
+* A sample REST Controller
+* Build & Run setup with Gradle
+
+---
+
+## 🔮 Next Steps (Future Work)
+
+* Add Entities + Repositories + Services (connect PostgreSQL)
+* Add Validation & DTOs
+* Add Global Exception Handling
+* Add Security (JWT/Keycloak) if needed
+
+---
