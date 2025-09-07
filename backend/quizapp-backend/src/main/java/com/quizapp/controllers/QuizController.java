@@ -8,6 +8,8 @@ import java.util.*;
 @RequestMapping("/api/quizzes")
 public class QuizController {
 
+    int x=5;
+    //com
     // Just a dummy in-memory list for demo purpose
     private final Map<Integer, String> quizzes = new HashMap<>();
 
