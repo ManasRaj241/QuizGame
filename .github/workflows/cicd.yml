@@ -15,17 +15,81 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug - Show repository structure
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          echo ""
+          echo "=== Files and directories in root ==="
+          ls -la
+          echo ""
+          echo "=== Looking for gradlew files recursively ==="
+          find . -name "gradlew*" -type f 2>/dev/null || echo "No gradlew files found"
+          echo ""
+          echo "=== Looking for build.gradle files ==="
+          find . -name "build.gradle*" -type f 2>/dev/null || echo "No build.gradle files found"
+          echo ""
+          echo "=== Directory tree (first 3 levels) ==="
+          tree -L 3 2>/dev/null || find . -type d -maxdepth 3 | head -20
+
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Locate and setup Gradle wrapper
+        id: gradle-setup
+        run: |
+          # Look for gradlew in common locations
+          GRADLEW_PATH=""
+          
+          if [ -f "./gradlew" ]; then
+            GRADLEW_PATH="./gradlew"
+            echo "Found gradlew in root directory"
+          elif [ -f "./backend/gradlew" ]; then
+            GRADLEW_PATH="./backend/gradlew"
+            echo "Found gradlew in backend directory"
+          elif [ -f "./backend/quizapp-backend/gradlew" ]; then
+            GRADLEW_PATH="./backend/quizapp-backend/gradlew"
+            echo "Found gradlew in backend/quizapp-backend directory"
+          elif [ -f "./quizapp-backend/gradlew" ]; then
+            GRADLEW_PATH="./quizapp-backend/gradlew"
+            echo "Found gradlew in quizapp-backend directory"
+          else
+            echo "No gradlew found, will use gradle command"
+            GRADLEW_PATH=""
+          fi
+          
+          echo "GRADLEW_PATH=$GRADLEW_PATH" >> $GITHUB_OUTPUT
+          
+          if [ -n "$GRADLEW_PATH" ]; then
+            echo "Making gradlew executable: $GRADLEW_PATH"
+            chmod +x "$GRADLEW_PATH"
+          
+            # Set working directory based on gradlew location
+            WORK_DIR=$(dirname "$GRADLEW_PATH")
+            echo "WORK_DIR=$WORK_DIR" >> $GITHUB_OUTPUT
+            echo "Working directory will be: $WORK_DIR"
+          fi
+
+      - name: Setup Gradle (fallback)
+        if: steps.gradle-setup.outputs.GRADLEW_PATH == ''
+        uses: gradle/gradle-build-action@v2
 
       - name: Build with Gradle
-        run: ./gradlew clean build --no-daemon
+        run: |
+          GRADLEW_PATH="${{ steps.gradle-setup.outputs.GRADLEW_PATH }}"
+          WORK_DIR="${{ steps.gradle-setup.outputs.WORK_DIR }}"
+          
+          if [ -n "$GRADLEW_PATH" ]; then
+            echo "Building with gradlew: $GRADLEW_PATH"
+            cd "$WORK_DIR"
+            ./gradlew clean build --no-daemon
+          else
+            echo "Building with gradle command"
+            gradle clean build --no-daemon
+          fi
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -33,11 +97,39 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Find Dockerfile
+        id: dockerfile
+        run: |
+          DOCKERFILE_PATH=""
+          DOCKER_CONTEXT=""
+          
+          if [ -f "./Dockerfile" ]; then
+            DOCKERFILE_PATH="./Dockerfile"
+            DOCKER_CONTEXT="."
+          elif [ -f "./backend/Dockerfile" ]; then
+            DOCKERFILE_PATH="./backend/Dockerfile"
+            DOCKER_CONTEXT="./backend"
+          elif [ -f "./backend/quizapp-backend/Dockerfile" ]; then
+            DOCKERFILE_PATH="./backend/quizapp-backend/Dockerfile"
+            DOCKER_CONTEXT="./backend/quizapp-backend"
+          elif [ -f "./quizapp-backend/Dockerfile" ]; then
+            DOCKERFILE_PATH="./quizapp-backend/Dockerfile"
+            DOCKER_CONTEXT="./quizapp-backend"
+          else
+            echo "No Dockerfile found!"
+            exit 1
+          fi
+          
+          echo "DOCKERFILE_PATH=$DOCKERFILE_PATH" >> $GITHUB_OUTPUT
+          echo "DOCKER_CONTEXT=$DOCKER_CONTEXT" >> $GITHUB_OUTPUT
+          echo "Found Dockerfile at: $DOCKERFILE_PATH"
+          echo "Docker context will be: $DOCKER_CONTEXT"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./Dockerfile
+          context: ${{ steps.dockerfile.outputs.DOCKER_CONTEXT }}
+          file: ${{ steps.dockerfile.outputs.DOCKERFILE_PATH }}
           push: true
           tags: |
             manas14935/quizgame-backend:latest
