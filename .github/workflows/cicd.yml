@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/** # runs for any feature branch (like your friend's branch)
+      - feature/**
   pull_request:
 
 jobs:
@@ -20,6 +20,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
