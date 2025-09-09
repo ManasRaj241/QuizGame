@@ -1,12 +1,12 @@
-# Use Gradle image for build
+# Stage 1: build with Gradle (keeps it simple)
 FROM gradle:8.9.0-jdk21 AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test
+RUN gradle clean build -x test --no-daemon
 
-# Use JDK image for running the app
-FROM eclipse-temurin:21-jdk
+# Stage 2: runtime (smaller image)
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar /app/app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
