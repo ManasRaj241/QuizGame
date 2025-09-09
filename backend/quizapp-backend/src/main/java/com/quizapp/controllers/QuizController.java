@@ -1,50 +1,55 @@
 package com.quizapp.controllers;
 
+import com.quizapp.entity.Topic;
+import com.quizapp.services.TopicService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/quizzes")
+@RequestMapping("/api/topics")
 public class QuizController {
 
-    int x=5;
-    //com
-    // Just a dummy in-memory list for demo purpose
-    private final Map<Integer, String> quizzes = new HashMap<>();
+    private final TopicService topicService;
 
+    public QuizController(TopicService topicService) {
+        this.topicService = topicService;
+    }
+
+    // 1. Get all topics
     @GetMapping
-    public List<String> getAllQuizzes() {
-        return new ArrayList<>(quizzes.values());
+    public ResponseEntity<List<Topic>> getAllTopics() {
+        return ResponseEntity.ok(topicService.getAllTopics());
     }
 
+    // 2. Get topic by ID
     @GetMapping("/{id}")
-    public String getQuizById(@PathVariable int id) {
-        return quizzes.getOrDefault(id, "Quiz not found");
+    public ResponseEntity<Topic> getTopicById(@PathVariable Long id) {
+        return topicService.getTopicById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // 3. Create new topic
     @PostMapping
-    public String createQuiz(@RequestBody String quizName) {
-        int id = quizzes.size() + 1;
-        quizzes.put(id, quizName);
-        return "Quiz created with ID: " + id;
+    public ResponseEntity<Topic> createTopic(@RequestBody Topic topic) {
+        return ResponseEntity.ok(topicService.createTopic(topic));
     }
 
+    // 4. Update topic
     @PutMapping("/{id}")
-    public String updateQuiz(@PathVariable int id, @RequestBody String quizName) {
-        if (quizzes.containsKey(id)) {
-            quizzes.put(id, quizName);
-            return "Quiz updated successfully!";
-        }
-        return "Quiz not found!";
+    public ResponseEntity<Topic> updateTopic(@PathVariable Long id, @RequestBody Topic topic) {
+        return topicService.updateTopic(id, topic)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // 5. Delete topic
     @DeleteMapping("/{id}")
-    public String deleteQuiz(@PathVariable int id) {
-        if (quizzes.containsKey(id)) {
-            quizzes.remove(id);
-            return "Quiz deleted successfully!";
-        }
-        return "Quiz not found!";
+    public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+        return topicService.deleteTopic(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 }
