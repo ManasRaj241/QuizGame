@@ -2,6 +2,7 @@ package com.quizapp.controllers;
 
 import com.quizapp.entity.Topic;
 import com.quizapp.services.TopicService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,11 +12,8 @@ import java.util.List;
 @RequestMapping("/api/topics")
 public class QuizController {
 
-    private final TopicService topicService;
-
-    public QuizController(TopicService topicService) {
-        this.topicService = topicService;
-    }
+    @Autowired
+    private TopicService topicService;
 
     // 1. Get all topics
     @GetMapping

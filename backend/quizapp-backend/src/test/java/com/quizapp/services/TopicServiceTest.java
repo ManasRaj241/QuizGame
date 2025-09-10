@@ -4,7 +4,9 @@ import com.quizapp.entity.Topic;
 import com.quizapp.repositories.TopicRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
@@ -13,13 +15,15 @@ import static org.mockito.Mockito.*;
 
 class TopicServiceTest {
 
+    @Mock
     private TopicRepository topicRepository;
+
+    @InjectMocks
     private TopicService topicService;
 
     @BeforeEach
     void setUp() {
-        topicRepository = Mockito.mock(TopicRepository.class);
-        topicService = new TopicService(topicRepository);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

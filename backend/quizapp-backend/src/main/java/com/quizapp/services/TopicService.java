@@ -2,18 +2,17 @@ package com.quizapp.services;
 
 import com.quizapp.entity.Topic;
 import com.quizapp.repositories.TopicRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TopicService {
 
-    private final TopicRepository topicRepository;
-
-    public TopicService(TopicRepository topicRepository) {
-        this.topicRepository = topicRepository;
-    }
+    @Autowired
+    private TopicRepository topicRepository;
 
     public List<Topic> getAllTopics() {
         return topicRepository.findAll();
